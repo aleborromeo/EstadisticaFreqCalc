@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from path_manager import Get_Resource_Path
+
 from calcs.manager_calcs import gestionar_datos
 from views.results import VentanaProcesamiento
 from imports.import_excel import Load_Excel , Change_Sheet_In_Loaded_Excel
