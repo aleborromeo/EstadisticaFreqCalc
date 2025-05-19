@@ -111,7 +111,7 @@ class mainWindow:
             )
 
             self.root.state(newstate="withdraw")
-            VentanaProcesamiento(self.root , Dictionary_Results , self.decimals_precision.get())
+            VentanaProcesamiento(Dictionary_Results)
 
         except (WarningException, FileNotFoundError) as e:
             messagebox.showwarning("Advertencia", str(e))

@@ -49,7 +49,7 @@ class VentanaProcesamiento:
 
     def mostrar_tabla_frecuencia(self):
         if self.data["tipo"] == "Discreta":
-            self.df_frecuencia = pd.DataFrame({
+            df_frecuencia = pd.DataFrame({
                 "Clase": self.data["xi"],
                 "Frecuencia": self.data["fi"],
                 "Frec. Relativa": self.data["hi"],
@@ -59,7 +59,7 @@ class VentanaProcesamiento:
             })
         elif self.data["tipo"] == "Continua":
             clases = [f"[ {i[0]} - {i[1]} >" for i in self.data["intervalos"]]
-            self.df_frecuencia = pd.DataFrame({
+            df_frecuencia = pd.DataFrame({
                 "Clase": clases,
                 "Frecuencia": self.data["fi"],
                 "Frec. Relativa": self.data["hi"],
@@ -111,8 +111,8 @@ class VentanaProcesamiento:
             scroll_x.config(command=tabla.xview)
 
             for col in columnas:
-                self.tabla.heading(col, text=col)
-                self.tabla.column(col, anchor="center", width=130)
+                tabla.heading(col, text=col)
+                tabla.column(col, anchor="center", width=130)
 
             for index, fila in df_frecuencia.iterrows():
                 tag = "evenrow" if index % 2 == 0 else "oddrow"
