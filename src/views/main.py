@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from path_manager import Get_Resource_Path
 from calcs.manager_calcs import gestionar_datos
 from views.results import VentanaProcesamiento
+from imports.import_excel import Load_Excel , Change_Sheet_In_Loaded_Excel
 
 import tkinter as tk
 from tkinter import messagebox, filedialog
@@ -27,6 +28,7 @@ class mainWindow:
         y = (self.root.winfo_screenheight() - height) // 2
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         self.root.configure(bg="#F5ECD5")
+        self.root.protocol("WM_DELETE_WINDOW" , self.Exit)
 
         self.excel_path = tk.StringVar(self.root)
         self.decimals_precision = tk.IntVar(self.root)
@@ -55,8 +57,8 @@ class mainWindow:
         self.iconoExcel = ImageTk.PhotoImage(iconoExcel_pil)
 
         btncargarexcel = ttkb.Button(self.root, image=self.iconoExcel, compound=tk.LEFT, text="Cargar Excel",
-                                     style="Custom.TButton",
-                                     command=self.cargar_excel)
+                                    style="Custom.TButton",
+                                    command= lambda: Load_Excel(self.excel_path , self.columns_name , self.combobox_columns_name , self.sheet_number))
         btncargarexcel.place(x=110, y=70)
 
         btnprocesar = ttkb.Button(self.root, text="Procesar", style="Custom.TButton", command=self.Process_Data)
@@ -65,39 +67,24 @@ class mainWindow:
     def crear_entradas(self):
         self.columns_name = []
         self.combobox_columns_name = ttkb.Combobox(self.root, values=self.columns_name, state="readonly",
-                                                   font=("Franklin Gothic Demi", 12), width=30)
+                                                    font=("Franklin Gothic Demi", 12), width=30)
         self.combobox_columns_name.place(x=110, y=170)
 
         spinbox_sheet_number = ttkb.Spinbox(self.root, from_=1, to=100, font=("Aptos", 10), width=10,
                                             textvariable=self.sheet_number, state="readonly",
-                                            command=self.actualizar_columnas)
+                                            command= lambda: Change_Sheet_In_Loaded_Excel(self.excel_path , self.columns_name , self.combobox_columns_name , self.sheet_number))
         spinbox_sheet_number.place(x=110, y=255)
         spinbox_sheet_number.set(1)
 
         opciones = ["Discreta", "Continua"]
         self.type_variable = ttkb.Combobox(self.root, values=opciones, state="readonly",
-                                           font=("Franklin Gothic Demi", 12), width=22)
+                                            font=("Franklin Gothic Demi", 12), width=22)
         self.type_variable.set("Seleccionar tipo de variable")
         self.type_variable.place(x=110, y=330)
 
         spinbox_precision = ttkb.Spinbox(self.root, from_=0, to=5, font=("Aptos", 10), width=10,
-                                         textvariable=self.decimals_precision, state="readonly")
+                                            textvariable=self.decimals_precision, state="readonly")
         spinbox_precision.place(x=110, y=430)
-
-    def cargar_excel(self):
-        ruta = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
-        if ruta:
-            self.excel_path.set(ruta)
-            self.actualizar_columnas()
-
-    def actualizar_columnas(self):
-        try:
-            sheet = self.sheet_number.get()
-            df = pd.read_excel(self.excel_path.get(), sheet_name=sheet - 1)
-            self.columns_name = list(df.columns)
-            self.combobox_columns_name.config(values=self.columns_name)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo cargar columnas: {e}")
 
     def Validate_Data(self):
         if not self.excel_path.get():
@@ -123,13 +110,19 @@ class mainWindow:
                 self.decimals_precision.get()
             )
 
-            self.root.destroy()
-            VentanaProcesamiento(Dictionary_Results)
+            self.root.state(newstate="withdraw")
+            VentanaProcesamiento(self.root , Dictionary_Results , self.decimals_precision.get())
 
         except (WarningException, FileNotFoundError) as e:
             messagebox.showwarning("Advertencia", str(e))
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def Exit(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        self.root.destroy()
 
 
 if __name__ == "__main__":
