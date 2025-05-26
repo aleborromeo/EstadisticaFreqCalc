@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+from ttkbootstrap import Style
 
 from tkinter import filedialog
 from datetime import datetime
@@ -25,6 +26,10 @@ class VentanaProcesamiento:
         self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
         self.root.configure(bg="#F5ECD5", highlightthickness=0, bd=0)
 
+
+        
+
+        self.root.state('zoomed')
         self.fig = None
 
         # Calcular el tamaño de la ventana
@@ -44,6 +49,7 @@ class VentanaProcesamiento:
         self.root.geometry(f"{width}x{height}+{x}+{y}")
 
         self.root.minsize(1100, 600)
+
         # Canvas + scrollbar general
         self.canvas = tk.Canvas(self.root, bg="#F5ECD5", highlightthickness=0)
         self.scroll_y = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
@@ -55,7 +61,15 @@ class VentanaProcesamiento:
         self.canvas.create_window((0, 0), window=self.contenedor, anchor="nw")
 
         self.contenedor.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>", lambda e: self.contenedor.configure(width=e.width))
+
+        # Frame centrado que contendrá los frames izquierdo y derecho
+        self.frame_central = tk.Frame(self.contenedor, bg="#F5ECD5")
+        self.frame_central.pack(pady=20)
+
+        # Ajusta el ancho máximo deseado del contenido central (por ejemplo, 1200 px)
+        self.frame_central.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.canvas.bind("<Configure>", lambda e: self.frame_central.configure(width=min(e.width, 1200)))
+
 
         self.decimals_precision = IntVar(self.root)
         self.decimals_precision.set(precision_from_main)
@@ -68,12 +82,22 @@ class VentanaProcesamiento:
         self.contenedor.grid_columnconfigure(1, weight=2, uniform="group1")
         self.contenedor.grid_rowconfigure(0, weight=1)
 
-        # Frames izquierdo y derecho
-        self.frame_izquierdo = ttkb.Frame(self.contenedor, bootstyle="light", padding=10)
+        self.frame_izquierdo = ttkb.Frame(self.frame_central, bootstyle="light", padding=10)
         self.frame_izquierdo.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
 
-        self.frame_derecho = ttkb.Frame(self.contenedor, bootstyle="light", padding=10)
-        self.frame_derecho.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        self.frame_derecho = ttkb.Frame(
+            self.frame_central,
+            bootstyle="light",
+            padding=10,
+            width=1000,
+            height=500  # Ajusta según lo que necesites
+        )
+        self.frame_derecho.grid(row=0, column=1, sticky="n", padx=(10, 20), pady=20)
+        self.frame_derecho.grid_propagate(False) # Muy importante: evita expansión automática
+
+        self.frame_central.grid_columnconfigure(0, weight=1)
+        #self.frame_central.grid_columnconfigure(1, weight=0)  # ⬅️ evita que la derecha crezca
+
 
         # Control precisión y tabla frecuencia
         precision_label = ttkb.Label(self.frame_izquierdo, text="Precisión decimales:", font=("Segoe UI", 11))
@@ -252,8 +276,8 @@ class VentanaProcesamiento:
             self.tabla_estadistica = ttk.Treeview(self.frame_derecho, columns=("Medida", "Valor"), show="headings", height=15)
             self.tabla_estadistica.heading("Medida", text="Medida")
             self.tabla_estadistica.heading("Valor", text="Valor")
-            self.tabla_estadistica.column("Medida", anchor="center", width=100)
-            self.tabla_estadistica.column("Valor", anchor="center", width=100)
+            self.tabla_estadistica.column("Medida", anchor="center", width=200)
+            self.tabla_estadistica.column("Valor", anchor="center", width=200)
 
         medidas = [
             ("Media", f"{self.data['media']:.{precision}f}"),
@@ -269,7 +293,7 @@ class VentanaProcesamiento:
             self.tabla_estadistica.insert("", tk.END, values=(medida, valor), tags=(tag,))
 
         # Aquí está el cambio para mover la tabla más a la derecha: padx a la izquierda
-        self.tabla_estadistica.pack(fill="both", expand=True, padx=(0, 115))
+        self.tabla_estadistica.pack(fill="both", expand=False, padx=(0, 140))
 
         self.tabla_estadistica.tag_configure("evenrow", background="#F5F5F5")
         self.tabla_estadistica.tag_configure("oddrow", background="#FFFFFF")
@@ -279,9 +303,26 @@ class VentanaProcesamiento:
         self._dibujar_grafico(self.decimals_precision.get())
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
 
+
+    def configurar_estilos(self):
+        self.estilo = Style()
+        self.estilo.configure("Custom.TButton",
+                        font=("Franklin Gothic Demi", 13),
+                        foreground="#F5ECD5",
+                        background="#626F47",
+                        padding=10)
+
     def regresar(self):
-        btn_regresar = ttkb.Button(self.contenedor, text="🔄 Volver a calcular", style="Custom.TButton", command=self.ir_a_main)
+        self.configurar_estilos()  # asegúrate de llamar esto antes de usar el estilo
+        btn_regresar = ttkb.Button(
+            self.contenedor,
+            text="🔄 Volver a calcular",
+            style="Custom.TButton",
+            command=self.ir_a_main,
+            width=40
+        )
         btn_regresar.place(x=1180, y=900)
+
 
     def ir_a_main(self):
         from views.main import mainWindow
