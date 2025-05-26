@@ -10,6 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
+
 from ttkbootstrap import Style
 
 from tkinter import filedialog
@@ -19,7 +20,7 @@ class VentanaProcesamiento:
     tabla_contador = 1
     grafico_contador = 1
 
-    def __init__(self, data , precision_from_main):
+    def __init__(self, data, precision_from_main):
         self.data = data
         self.root = ttkb.Window(themename="flatly")
         self.root.title("Procesamiento de Datos")
@@ -52,7 +53,9 @@ class VentanaProcesamiento:
 
         # Canvas + scrollbar general
         self.canvas = tk.Canvas(self.root, bg="#F5ECD5", highlightthickness=0)
-        self.scroll_y = tk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
+        self.scroll_y = tk.Scrollbar(
+            self.root, orient="vertical", command=self.canvas.yview
+        )
         self.scroll_y.pack(side="right", fill="y")
         self.canvas.pack(side="left", fill="both", expand=True)
         self.canvas.configure(yscrollcommand=self.scroll_y.set)
@@ -60,6 +63,13 @@ class VentanaProcesamiento:
         self.contenedor = tk.Frame(self.canvas, bg="#F5ECD5")
         self.canvas.create_window((0, 0), window=self.contenedor, anchor="nw")
 
+        self.contenedor.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
+        )
+        self.canvas.bind(
+            "<Configure>", lambda e: self.contenedor.configure(width=e.width)
+        )
         self.contenedor.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
         # Frame centrado que contendrá los frames izquierdo y derecho
@@ -69,7 +79,6 @@ class VentanaProcesamiento:
         # Ajusta el ancho máximo deseado del contenido central (por ejemplo, 1200 px)
         self.frame_central.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
         self.canvas.bind("<Configure>", lambda e: self.frame_central.configure(width=min(e.width, 1200)))
-
 
         self.decimals_precision = IntVar(self.root)
         self.decimals_precision.set(precision_from_main)
@@ -81,7 +90,13 @@ class VentanaProcesamiento:
         self.contenedor.grid_columnconfigure(0, weight=3, uniform="group1")
         self.contenedor.grid_columnconfigure(1, weight=2, uniform="group1")
         self.contenedor.grid_rowconfigure(0, weight=1)
-
+        # Frames izquierdo y derecho
+        self.frame_izquierdo = ttkb.Frame(
+            self.contenedor, bootstyle="light", padding=10
+        )
+        self.frame_izquierdo.grid(
+            row=0, column=0, sticky="nsew", padx=(20, 10), pady=20
+        )
         self.frame_izquierdo = ttkb.Frame(self.frame_central, bootstyle="light", padding=10)
         self.frame_izquierdo.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
 
@@ -100,15 +115,26 @@ class VentanaProcesamiento:
 
 
         # Control precisión y tabla frecuencia
-        precision_label = ttkb.Label(self.frame_izquierdo, text="Precisión decimales:", font=("Segoe UI", 11))
+        precision_label = ttkb.Label(
+            self.frame_izquierdo, text="Precisión decimales:", font=("Segoe UI", 11)
+        )
         precision_label.pack(anchor="nw")
-        self.spinbox_precision = ttkb.Spinbox(self.frame_izquierdo, from_=0, to=10, width=6,
-                                              textvariable=self.decimals_precision, state="readonly",
-                                              command=self.update_table)
+        self.spinbox_precision = ttkb.Spinbox(
+            self.frame_izquierdo,
+            from_=0,
+            to=10,
+            width=6,
+            textvariable=self.decimals_precision,
+            state="readonly",
+            command=self.update_table,
+        )
         self.spinbox_precision.pack(anchor="nw", pady=(0, 10))
 
-        tabla_title = ttkb.Label(self.frame_izquierdo, text=f"Tabla {self.tabla_contador:02d}: Frecuencia",
-                                 font=("Segoe UI", 13, "bold"))
+        tabla_title = ttkb.Label(
+            self.frame_izquierdo,
+            text=f"Tabla {self.tabla_contador:02d}: Frecuencia",
+            font=("Segoe UI", 13, "bold"),
+        )
         tabla_title.pack(anchor="nw")
 
         self.mostrar_tabla_frecuencia(self.decimals_precision.get())
@@ -124,14 +150,22 @@ class VentanaProcesamiento:
         self._dibujar_grafico(self.decimals_precision.get())
 
         # Tabla medidas estadísticas
-        medidas_title = ttkb.Label(self.frame_derecho, text=f"Tabla {self.tabla_contador + 1:02d}: Medidas Estadísticas",
-                                  font=("Segoe UI", 13, "bold"))
+        medidas_title = ttkb.Label(
+            self.frame_derecho,
+            text=f"Tabla {self.tabla_contador + 1:02d}: Medidas Estadísticas",
+            font=("Segoe UI", 13, "bold"),
+        )
         medidas_title.pack(anchor="nw", pady=(0, 10))
 
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
 
         # Botón volver abajo a la derecha
-        btn_regresar = ttkb.Button(self.root, text="🔄 Volver a calcular", style="success", command=self.ir_a_main)
+        btn_regresar = ttkb.Button(
+            self.root,
+            text="🔄 Volver a calcular",
+            style="success",
+            command=self.ir_a_main,
+        )
         btn_regresar.place(relx=0.95, rely=0.95, anchor="se")
 
         self.root.mainloop()
@@ -147,17 +181,39 @@ class VentanaProcesamiento:
         elif self.data["tipo"] == "Continua":
             clases = [f"[ {i[0]} - {i[1]} >" for i in self.data["intervalos"]]
 
-        df_frecuencia = pd.DataFrame({
-            "Clase": clases,
-            "Frecuencia": self.data["fi"],
-            "Frec. Relativa": self.data["hi"],
-            "Frec. Rel. Acum.": self.data["Hi"],
-            "Pi%": self.data["pi"],
-            "Pi Acum.": self.data["Pi"]
-        })
+        df_frecuencia = pd.DataFrame(
+            {
+                "Clase": clases,
+                "Frecuencia": self.data["fi"],
+                "Frec. Relativa": self.data["hi"],
+                "Frec. Rel. Acum.": self.data["Hi"],
+                "Pi%": self.data["pi"],
+                "Pi Acum.": self.data["Pi"],
+            }
+        )
 
-        self.total_row = ("Total", f'{np.sum(self.data["fi"]):.2f}', f'{np.sum(self.data["hi"]):.2f}', "", f'{np.sum(self.data["pi"]):.2f}', "")
+        self.total_row = (
+            "Total",
+            f'{np.sum(self.data["fi"]):.2f}',
+            f'{np.sum(self.data["hi"]):.2f}',
+            "",
+            f'{np.sum(self.data["pi"]):.2f}',
+            "",
+        )
+
         columnas = list(df_frecuencia.columns)
+
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure(
+            "Custom.Treeview", background="#FFFFFF", foreground="black", rowheight=25
+        )
+        style.configure(
+            "Custom.Treeview.Heading", background="#5D6D7E", foreground="white"
+        )
+
+        tabla_frame = tk.Frame(self.frame_izquierdo, bg="#F5ECD5")
+        tabla_frame.pack(fill="both", expand=True)
 
         if(not self.tabla):
             style = ttk.Style()
@@ -170,7 +226,6 @@ class VentanaProcesamiento:
 
             scroll_y = tk.Scrollbar(tabla_frame, orient="vertical")
             scroll_y.pack(side="right", fill="y")
-
             scroll_x = tk.Scrollbar(tabla_frame, orient="horizontal")
             scroll_x.pack(side="bottom", fill="x")
             self.tabla = ttk.Treeview(tabla_frame,
@@ -183,6 +238,16 @@ class VentanaProcesamiento:
 
             scroll_y.config(command=self.tabla.yview)
             scroll_x.config(command=self.tabla.xview)
+            
+        self.tabla = ttk.Treeview(
+              tabla_frame,
+              columns=columnas,
+              show="headings",
+              yscrollcommand=scroll_y.set,
+              xscrollcommand=scroll_x.set,
+              height=8,
+              style="Custom.Treeview",
+        )
 
         for col in columnas:
             self.tabla.heading(col, text=col)
@@ -190,14 +255,19 @@ class VentanaProcesamiento:
 
         for index in range(len(self.data["fi"])):
             tag = "evenrow" if index % 2 == 0 else "oddrow"
-            self.tabla.insert("", tk.END, values=(
-                clases[index],
-                self.data["fi"][index],
-                f'{self.data["hi"][index]:.{precision}f}',
-                f'{self.data["Hi"][index]:.{precision}f}',
-                f'{self.data["pi"][index]:.{precision}f}',
-                f'{self.data["Pi"][index]:.{precision}f}',
-            ), tags=(tag,))
+            self.tabla.insert(
+                "",
+                tk.END,
+                values=(
+                    clases[index],
+                    self.data["fi"][index],
+                    f'{self.data["hi"][index]:.{precision}f}',
+                    f'{self.data["Hi"][index]:.{precision}f}',
+                    f'{self.data["pi"][index]:.{precision}f}',
+                    f'{self.data["Pi"][index]:.{precision}f}',
+                ),
+                tags=(tag,),
+            )
 
         self.tabla.insert("", tk.END, values=self.total_row)
 
@@ -249,24 +319,6 @@ class VentanaProcesamiento:
         else:
             raise Exception("No se detecto el tipo de variable")
 
-    def export_graphs(self):
-        PATH = filedialog.askdirectory()
-        if(not os.path.exists(PATH)):
-            raise Exception("Ruta no valida")
-
-        if(self.data["tipo"] == "Discreta"):
-            if(PATH):
-                now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
-                file_name = f"Image_{now_time}.jpg"
-                PATH = os.path.join(PATH , file_name)
-                self.fig.savefig(PATH , dpi=300)
-        elif(self.data["tipo"] == "Continua"):
-            if(PATH):
-                now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
-                file_name = f"Image_{now_time}.jpg"
-                PATH = os.path.join(PATH , file_name)
-                self.fig.savefig(PATH , dpi=300)
-
     def mostrar_resultados_estadisticos(self , precision):
         if(self.tabla_estadistica):
             for item in self.tabla_estadistica.get_children():
@@ -285,12 +337,32 @@ class VentanaProcesamiento:
             ("Moda", ", ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
             ("Varianza", f"{self.data['varianza']:.{precision}f}"),
             ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
-            ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")
-        ]
+            ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
+
+
+    def export_graphs(self):
+        PATH = filedialog.askdirectory()
+        if(not os.path.exists(PATH)):
+            raise Exception("Ruta no valida")
+
+        if(self.data["tipo"] == "Discreta"):
+            if(PATH):
+                now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
+                file_name = f"Image_{now_time}.jpg"
+                PATH = os.path.join(PATH , file_name)
+                self.fig.savefig(PATH , dpi=300)
+        elif(self.data["tipo"] == "Continua"):
+            if(PATH):
+                now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
+                file_name = f"Image_{now_time}.jpg"
+                PATH = os.path.join(PATH , file_name)
+                self.fig.savefig(PATH , dpi=300)
 
         for i, (medida, valor) in enumerate(medidas):
             tag = "evenrow" if i % 2 == 0 else "oddrow"
-            self.tabla_estadistica.insert("", tk.END, values=(medida, valor), tags=(tag,))
+            self.tabla_estadistica.insert(
+                "", tk.END, values=(medida, valor), tags=(tag,)
+            )
 
         # Aquí está el cambio para mover la tabla más a la derecha: padx a la izquierda
         self.tabla_estadistica.pack(fill="both", expand=False, padx=(0, 140))
@@ -318,6 +390,8 @@ class VentanaProcesamiento:
             self.contenedor,
             text="🔄 Volver a calcular",
             style="Custom.TButton",
+            command=lambda: self.ir_a_main(),
+            bootstyle="success",
             command=self.ir_a_main,
             width=40
         )
@@ -325,6 +399,8 @@ class VentanaProcesamiento:
 
 
     def ir_a_main(self):
-        from views.main import mainWindow
+        from views.main import mainWindow  # Mejor mover al inicio del archivo
+
         self.root.destroy()
-        app = mainWindow()
+        os.execl(sys.executable, sys.executable, *sys.argv)
+        mainWindow()
