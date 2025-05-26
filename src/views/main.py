@@ -3,6 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from path_manager import Get_Resource_Path
 from calcs.manager_calcs import gestionar_datos
 from views.results import VentanaProcesamiento
@@ -20,7 +21,7 @@ class mainWindow:
     def __init__(self):
         self.root = ttkb.Window(themename="flatly")
         self.root.title("TabuladorPy")
-        self.root.iconbitmap("assets/icono.ico")
+        self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
         width, height = 700, 550
 
         x = (self.root.winfo_screenwidth() - width) // 2
@@ -51,7 +52,7 @@ class mainWindow:
         ttkb.Label(self.root, text="Presición:", style="Custom.TLabel").place(x=110, y=390)
 
     def crear_botones(self):
-        iconoExcel_pil = Image.open("assets/icono-excel.png").resize((24, 24), Image.LANCZOS)
+        iconoExcel_pil = Image.open(Get_Resource_Path("assets/icono-excel.png")).resize((24, 24), Image.LANCZOS)
         self.iconoExcel = ImageTk.PhotoImage(iconoExcel_pil)
 
         btncargarexcel = ttkb.Button(self.root, image=self.iconoExcel, compound=tk.LEFT, text="Cargar Excel",
