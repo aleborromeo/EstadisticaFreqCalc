@@ -12,6 +12,7 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         raise ValueError("La columna no existe en el archivo Excel.")
 
     data = df[column_name].dropna().tolist()
+
     try:
         data = list(map(float, data))  # Intenta convertir todos los valores a float
     except:
@@ -40,12 +41,15 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         }
 
     elif tipo_variable == "Continua":
+        max_n_decimals_in_data = g.Find_Max_Decimals_In_Data(data)
+
         vmin = g.Find_Min(data)
         vmax = g.Find_Max(data)
         rango = g.Calc_Range(data)
         k = g.Calc_Intervals_Number(n)
         k_redondeado = g.Calc_Rounded_Intervals_Number(k)
-        amplitud, decimales = g.Calc_Amplitude(rango, k_redondeado, precision)
+        amplitud, decimales = g.Calc_Amplitude(rango, k_redondeado, max_n_decimals_in_data)
+        print(f"{amplitud=} ; {decimales=}")
         intervalos = g.Calc_Intervals(vmin, amplitud, k_redondeado, decimales)
         xi = g.Calc_xi(intervalos)
         fi = g.Calc_fi(data, intervalos)

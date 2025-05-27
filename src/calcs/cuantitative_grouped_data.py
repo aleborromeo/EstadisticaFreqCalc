@@ -4,6 +4,11 @@ from decimal import Decimal
 
 # ========================================================= Calculo de Frecuencias =========================================================
 
+def Find_Max_Decimals_In_Data(Data):
+    N_Decimals = [len(str(data).split(".")[1]) for data in Data if "." in str(data)]
+
+    return np.max(N_Decimals)
+
 def Find_Min(data):
     return np.min(data)
 
@@ -33,6 +38,8 @@ def Calc_Amplitude(rango, m_redondeado , max_n_decimals_in_data):
         ==============================================================================================
     """
     Number = rango/m_redondeado
+    print(f"{Number=}")
+
     N_Decimals = max_n_decimals_in_data
     if(Number - round(Number) != 0):
         """ print(f"{Number=}") """

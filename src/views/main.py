@@ -16,6 +16,7 @@ from ttkbootstrap.constants import *
 from excception_handler import WarningException
 from PIL import Image, ImageTk
 import pandas as pd
+import openpyxl
 
 from python_calamine import CalamineWorkbook
 import polars as pl
@@ -25,6 +26,7 @@ class mainWindow:
         self.root = ttkb.Window(themename="flatly")
         self.root.title("TabuladorPy")
         self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
+        self.root.protocol("WM_DELETE_WINDOW" , self.Close_Program)
         width, height = 700, 550
 
         x = (self.root.winfo_screenwidth() - width) // 2
@@ -42,17 +44,17 @@ class mainWindow:
         self.texto()
 
     def estilos_personalizados(self):
-        style = ttkb.Style()
-        style.configure("Custom.TLabel", foreground="#222831", background="#F5ECD5", font=("Franklin Gothic Demi", 13))
-        style.configure("Custom.TButton", foreground="#F5ECD5", background="#626F47", font=("Franklin Gothic Demi", 13))
-        style.configure("Custom.TEntry", fieldbackground="#FFFFFF", foreground="#222831", font=("Aptos", 12))
+        self.style = ttkb.Style()
+        self.style.configure("Custom.TLabel", foreground="#222831", background="#F5ECD5", font=("Franklin Gothic Demi", 13))
+        self.style.configure("Custom.TButton", foreground="#F5ECD5", background="#626F47", font=("Franklin Gothic Demi", 13))
+        self.style.configure("Custom.TEntry", fieldbackground="#FFFFFF", foreground="#222831", font=("Aptos", 12))
 
     def texto(self):
         ttkb.Label(self.root, text="Cargue la tabla de excel:", style="Custom.TLabel").place(x=110, y=30)
         ttkb.Label(self.root, text="Nombre de la columna:", style="Custom.TLabel").place(x=110, y=130)
         ttkb.Label(self.root, text="Numero de hoja", style="Custom.TLabel").place(x=110, y=215)
         ttkb.Label(self.root, text="Tipo de variable:", style="Custom.TLabel").place(x=110, y=295)
-        ttkb.Label(self.root, text="Presición:", style="Custom.TLabel").place(x=110, y=390)
+        ttkb.Label(self.root, text="Presición de los resultados:", style="Custom.TLabel").place(x=110, y=390)
 
     def crear_botones(self):
         iconoExcel_pil = Image.open(Get_Resource_Path("assets/icono-excel.png")).resize((24, 24), Image.LANCZOS)
@@ -87,6 +89,7 @@ class mainWindow:
         spinbox_precision = ttkb.Spinbox(self.root, from_=1, to=10, font=("Aptos", 10), width=10,
                                          textvariable=self.decimals_precision, state="readonly")
         spinbox_precision.place(x=110, y=430)
+        spinbox_precision.set(1)
 
     def cargar_excel(self):
         ruta = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
@@ -124,15 +127,26 @@ class mainWindow:
 
     def eliminar_preview(self):
         self.excel_path.set("")
+        self.columns_name.clear()
+        self.combobox_columns_name["values"] = self.columns_name
+        self.combobox_columns_name.set("")
+
         if hasattr(self, 'frame_preview') and self.frame_preview:
             self.frame_preview.destroy()
 
     def actualizar_columnas(self):
         try:
+            Prev_loaded_excel = openpyxl.load_workbook(self.excel_path.get() , read_only=True , keep_links=False , data_only=True)
+
             sheet = self.sheet_number.get()
+            if(sheet > len(Prev_loaded_excel.sheetnames)):
+                self.sheet_number.set(sheet - 1)
+                raise Exception(f"No existe el numero de hoja {sheet}")
+
             Excel = CalamineWorkbook.from_path(self.excel_path.get()).get_sheet_by_index(sheet - 1).to_python(skip_empty_area=False)
             self.columns_name = [col_name for col_name in Excel[0] if col_name]
             self.combobox_columns_name.config(values=self.columns_name)
+            self.combobox_columns_name.set(self.columns_name[0])
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo cargar columnas: {e}")
 
@@ -161,14 +175,18 @@ class mainWindow:
                 self.sheet_number.get(),
             )
 
-            self.root.destroy()
-            VentanaProcesamiento(Dictionary_Results , self.decimals_precision.get())
+            VentanaProcesamiento(self.root , Dictionary_Results , self.decimals_precision.get())
 
         except (WarningException, FileNotFoundError) as e:
             messagebox.showwarning("Advertencia", str(e))
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
+    def Close_Program(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        self.root.quit()
+        self.root.destroy()
 
 if __name__ == "__main__":
     app = mainWindow()

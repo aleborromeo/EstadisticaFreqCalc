@@ -20,15 +20,16 @@ class VentanaProcesamiento:
     tabla_contador = 1
     grafico_contador = 1
 
-    def __init__(self, data, precision_from_main):
+    def __init__(self, main_window , data, precision_from_main):
+        self.main_window = main_window
+        self.main_window.state(newstate="withdraw")
+
         self.data = data
         self.root = ttkb.Window(themename="flatly")
         self.root.title("Procesamiento de Datos")
         self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
         self.root.configure(bg="#F5ECD5", highlightthickness=0, bd=0)
-
-
-        
+        self.root.protocol("WM_DELETE_WINDOW" , self.ir_a_main)
 
         self.root.state('zoomed')
         self.fig = None
@@ -63,13 +64,6 @@ class VentanaProcesamiento:
         self.contenedor = tk.Frame(self.canvas, bg="#F5ECD5")
         self.canvas.create_window((0, 0), window=self.contenedor, anchor="nw")
 
-        self.contenedor.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
-        )
-        self.canvas.bind(
-            "<Configure>", lambda e: self.contenedor.configure(width=e.width)
-        )
         self.contenedor.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
         # Frame centrado que contendrá los frames izquierdo y derecho
@@ -92,7 +86,7 @@ class VentanaProcesamiento:
         self.contenedor.grid_rowconfigure(0, weight=1)
         # Frames izquierdo y derecho
         self.frame_izquierdo = ttkb.Frame(
-            self.contenedor, bootstyle="light", padding=10
+            self.frame_central, bootstyle="light", padding=10
         )
         self.frame_izquierdo.grid(
             row=0, column=0, sticky="nsew", padx=(20, 10), pady=20
@@ -236,16 +230,6 @@ class VentanaProcesamiento:
 
             scroll_y.config(command=self.tabla.yview)
             scroll_x.config(command=self.tabla.xview)
-            
-        self.tabla = ttk.Treeview(
-              tabla_frame,
-              columns=columnas,
-              show="headings",
-              yscrollcommand=scroll_y.set,
-              xscrollcommand=scroll_x.set,
-              height=8,
-              style="Custom.Treeview",
-        )
 
         for col in columnas:
             self.tabla.heading(col, text=col)
@@ -335,7 +319,13 @@ class VentanaProcesamiento:
             ("Varianza", f"{self.data['varianza']:.{precision}f}"),
             ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
             ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
+        for i, (medida, valor) in enumerate(medidas):
+            tag = "evenrow" if i % 2 == 0 else "oddrow"
+            self.tabla_estadistica.insert("", tk.END, values=(medida, valor), tags=(tag,))
 
+        self.tabla_estadistica.pack(fill="both", expand=False, padx=(0, 140))
+        self.tabla_estadistica.tag_configure("evenrow", background="#F5F5F5")
+        self.tabla_estadistica.tag_configure("oddrow", background="#FFFFFF")
 
     def export_graphs(self):
         PATH = filedialog.askdirectory()
@@ -381,12 +371,15 @@ class VentanaProcesamiento:
             command=self.ir_a_main,
             width=40
         )
-        btn_regresar.place(x=1180, y=900)
+        btn_regresar.place(x=1050 , y=890 , width=40 , height=25)
 
 
     def ir_a_main(self):
-        from views.main import mainWindow  # Mejor mover al inicio del archivo
-
+        self.root.quit()
         self.root.destroy()
-        os.execl(sys.executable, sys.executable, *sys.argv)
-        mainWindow()
+
+        style = ttkb.Style()
+        style.configure("Custom.TLabel", foreground="#222831", background="#F5ECD5", font=("Franklin Gothic Demi", 13))
+        style.configure("Custom.TButton", foreground="#F5ECD5", background="#626F47", font=("Franklin Gothic Demi", 13))
+        style.configure("Custom.TEntry", fieldbackground="#FFFFFF", foreground="#222831", font=("Aptos", 12))
+        self.main_window.state(newstate="normal")
