@@ -97,8 +97,6 @@ class VentanaProcesamiento:
         self.frame_izquierdo.grid(
             row=0, column=0, sticky="nsew", padx=(20, 10), pady=20
         )
-        self.frame_izquierdo = ttkb.Frame(self.frame_central, bootstyle="light", padding=10)
-        self.frame_izquierdo.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
 
         self.frame_derecho = ttkb.Frame(
             self.frame_central,
@@ -268,7 +266,6 @@ class VentanaProcesamiento:
                 ),
                 tags=(tag,),
             )
-
         self.tabla.insert("", tk.END, values=self.total_row)
 
         self.tabla.pack(fill="both", expand=True)
@@ -358,17 +355,7 @@ class VentanaProcesamiento:
                 PATH = os.path.join(PATH , file_name)
                 self.fig.savefig(PATH , dpi=300)
 
-        for i, (medida, valor) in enumerate(medidas):
-            tag = "evenrow" if i % 2 == 0 else "oddrow"
-            self.tabla_estadistica.insert(
-                "", tk.END, values=(medida, valor), tags=(tag,)
-            )
 
-        # Aquí está el cambio para mover la tabla más a la derecha: padx a la izquierda
-        self.tabla_estadistica.pack(fill="both", expand=False, padx=(0, 140))
-
-        self.tabla_estadistica.tag_configure("evenrow", background="#F5F5F5")
-        self.tabla_estadistica.tag_configure("oddrow", background="#FFFFFF")
 
     def update_table(self):
         self.mostrar_tabla_frecuencia(self.decimals_precision.get())
@@ -390,7 +377,6 @@ class VentanaProcesamiento:
             self.contenedor,
             text="🔄 Volver a calcular",
             style="Custom.TButton",
-            command=lambda: self.ir_a_main(),
             bootstyle="success",
             command=self.ir_a_main,
             width=40
