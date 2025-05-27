@@ -30,6 +30,8 @@ class VentanaProcesamiento:
         self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
         self.root.configure(bg="#F5ECD5", highlightthickness=0, bd=0)
         self.root.protocol("WM_DELETE_WINDOW" , self.ir_a_main)
+        self.style = ttkb.Style() 
+        self.estilos_personalizados()
 
         self.root.state('zoomed')
         self.fig = None
@@ -151,14 +153,23 @@ class VentanaProcesamiento:
 
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
 
-        # Botón volver abajo a la derecha
         btn_regresar = ttkb.Button(
             self.root,
             text="🔄 Volver a calcular",
-            style="success",
+            style="Custom.TButton",
             command=self.ir_a_main,
+            width=40
         )
-        btn_regresar.place(relx=0.95, rely=0.95, anchor="se")
+        btn_regresar.place(x=1425, y=600)
+        
+        btn_exportarGrafico = ttkb.Button(
+            self.root,
+            text="Exportar Gráfico",
+            style="Custom.TButton",
+            command=self.export_graphs,
+            width=40
+        )
+        btn_exportarGrafico.place(x=1425, y=540)
 
         self.root.mainloop()
 
@@ -345,35 +356,25 @@ class VentanaProcesamiento:
                 PATH = os.path.join(PATH , file_name)
                 self.fig.savefig(PATH , dpi=300)
 
+    def estilos_personalizados(self):
+        self.style.configure("Custom.TButton",
+            font=("Franklin Gothic Demi", 13),
+            foreground="#F5ECD5",
+            background="#626F47",
+            padding=10,
+            borderwidth=0,
+            relief="flat")
+
+        self.style.map("Custom.TButton",
+            background=[("active", "#4E5A36"), ("!active", "#626F47")],
+            foreground=[("disabled", "#A0A0A0"), ("!disabled", "#F5ECD5")])
 
 
     def update_table(self):
         self.mostrar_tabla_frecuencia(self.decimals_precision.get())
         self._dibujar_grafico(self.decimals_precision.get())
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
-
-
-    def configurar_estilos(self):
-        self.estilo = Style()
-        self.estilo.configure("Custom.TButton",
-                        font=("Franklin Gothic Demi", 13),
-                        foreground="#F5ECD5",
-                        background="#626F47",
-                        padding=10)
-
-    def regresar(self):
-        self.configurar_estilos()  # asegúrate de llamar esto antes de usar el estilo
-        btn_regresar = ttkb.Button(
-            self.contenedor,
-            text="🔄 Volver a calcular",
-            style="Custom.TButton",
-            bootstyle="success",
-            command=self.ir_a_main,
-            width=40
-        )
-        btn_regresar.place(x=1050 , y=890 , width=40 , height=25)
-
-
+        
     def ir_a_main(self):
         self.root.quit()
         self.root.destroy()
