@@ -137,11 +137,13 @@ class VentanaProcesamiento:
         self.grafico_frame = tk.Frame(self.frame_izquierdo, bg="#F5ECD5")
         self.grafico_frame.pack(fill="x", pady=10)
 
+        plt.style.use('ggplot')
+
         self.fig, self.ax = plt.subplots(figsize=(10, 4))
         self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.grafico_frame)
         self.canvas_fig.get_tk_widget().pack(fill="both", expand=True)
 
-        self._dibujar_grafico(self.decimals_precision.get())
+        self._dibujar_grafico()
 
         # Tabla medidas estadísticas
         medidas_title = ttkb.Label(
@@ -197,10 +199,10 @@ class VentanaProcesamiento:
 
         self.total_row = (
             "Total",
-            f'{np.sum(self.data["fi"]):.2f}',
+            f'{np.sum(self.data["fi"])}',
             f'{np.sum(self.data["hi"]):.2f}',
             "",
-            f'{np.sum(self.data["pi"]):.2f}',
+            f'{np.sum(self.data["pi"]):.2f}%',
             "",
         )
 
@@ -256,8 +258,8 @@ class VentanaProcesamiento:
                     self.data["fi"][index],
                     f'{self.data["hi"][index]:.{precision}f}',
                     f'{self.data["Hi"][index]:.{precision}f}',
-                    f'{self.data["pi"][index]:.{precision}f}',
-                    f'{self.data["Pi"][index]:.{precision}f}',
+                    f'{self.data["pi"][index]:.{precision}f}%',
+                    f'{self.data["Pi"][index]:.{precision}f}%',
                 ),
                 tags=(tag,),
             )
@@ -265,7 +267,7 @@ class VentanaProcesamiento:
 
         self.tabla.pack(fill="both", expand=True)
 
-    def _dibujar_grafico(self, precision):
+    def _dibujar_grafico(self):
         if(self.data["tipo"] == "Discreta"):
             self.ax.clear()
 
@@ -275,7 +277,7 @@ class VentanaProcesamiento:
             elif self.data["tipo"] == "Continua":
                 clases = [f"[ {i[0]} - {i[1]} >" for i in self.data["intervalos"]]
 
-            self.ax.bar(clases, self.data["fi"], color="#5D6D7E")
+            self.ax.bar(clases, self.data["fi"], color="#69b3a2" , edgecolor="black" , width=0.6)
             self.ax.set_title(f"Gráfico {self.grafico_contador:02d}: Distribución de Frecuencias", fontsize=12, fontweight="bold")
             self.ax.set_xticks(range(len(clases)))
             self.ax.set_xticklabels(clases, fontsize=9, rotation=30, rotation_mode="anchor", ha="right")
@@ -283,9 +285,14 @@ class VentanaProcesamiento:
             self.ax.set_xlabel("Clases", fontsize=12)
             self.ax.set_ylabel("Frecuencia", fontsize=12)
 
-            for i, v in enumerate(self.data["fi"]):
-                self.ax.text(i, v + 0.5, f'{self.data["pi"][i]:.{precision}f}%', ha='center', fontsize=10)
+            self.ax.grid(axis='y', linestyle='--', alpha=0.5)
 
+            for i, v in enumerate(self.data["fi"]):
+                self.ax.text(i, v + (v * 0.01), f'{self.data["fi"][i]}', ha='center' , fontsize=10)
+            
+            for spine in ['top', 'right']:
+                self.fig.gca().spines[spine].set_visible(False)
+            
             self.fig.tight_layout()
             self.canvas_fig.draw()
         elif(self.data["tipo"] == "Continua"):
@@ -294,18 +301,37 @@ class VentanaProcesamiento:
             self.ax.clear()
 
             inf_limits = [limits[0] for limits in self.data["intervalos"]]
-            cuentas, bordes, patches = self.ax.hist(self.data["data"] , bins=inf_limits, edgecolor='black', align='mid', rwidth=1 , color="gray")
-
+            cuentas, bordes, patches = self.ax.hist(self.data["data"] , bins=inf_limits, edgecolor='white', align='mid', rwidth=1 , color="#69b3a2" , alpha=0.8)
             for i in range(len(cuentas)):
                 altura = cuentas[i]
                 centro = (bordes[i] + bordes[i+1]) / 2
-                self.ax.text(centro, altura + 0.2, str(int(altura)), ha='center', va='bottom')
-                
+                self.ax.text(centro, altura + (altura * 0.01), str(int(altura)), ha='center', va='bottom')
+            puntos_medios = 0.5 * (bordes[:-1] + bordes[1:])
+
+            self.ax.plot(
+                puntos_medios, 
+                cuentas, 
+                color='crimson', 
+                linewidth=2, 
+                marker='o', 
+                markersize=6,
+                markerfacecolor='white',
+                markeredgewidth=2
+            )
+
             self.ax.set_xticks(inf_limits)
             # Opcional: Etiquetas y estilo
             self.ax.set_xlabel("Intervalos")
             self.ax.set_ylabel("Frecuencia")
             self.ax.set_title("Grafico N°01 Histograma de Frecuencias")
+            self.ax.set_xticks(inf_limits)
+            self.ax.set_xticklabels(inf_limits , rotation=30 , rotation_mode="anchor" , ha="right")
+
+            for spine in ['top', 'right']:
+                self.fig.gca().spines[spine].set_visible(False)
+
+            self.ax.grid(axis='y', linestyle='--', alpha=0.4)
+
             self.fig.tight_layout()
             self.canvas_fig.draw()
         else:
@@ -372,7 +398,6 @@ class VentanaProcesamiento:
 
     def update_table(self):
         self.mostrar_tabla_frecuencia(self.decimals_precision.get())
-        self._dibujar_grafico(self.decimals_precision.get())
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
         
     def ir_a_main(self):
@@ -384,3 +409,4 @@ class VentanaProcesamiento:
         style.configure("Custom.TButton", foreground="#F5ECD5", background="#626F47", font=("Franklin Gothic Demi", 13))
         style.configure("Custom.TEntry", fieldbackground="#FFFFFF", foreground="#222831", font=("Aptos", 12))
         self.main_window.state(newstate="normal")
+        self.main_window.lift()

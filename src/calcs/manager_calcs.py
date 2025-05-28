@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from calcs import cuantitative_no_grouped_data as nq
 from calcs import cuantitative_grouped_data as g
 
@@ -53,12 +54,14 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         intervalos = g.Calc_Intervals(vmin, amplitud, k_redondeado, decimales)
         xi = g.Calc_xi(intervalos)
         fi = g.Calc_fi(data, intervalos)
+        Arr_Fi = np.cumsum(fi)
+
         hi = g.Calc_hi(fi, n)
         Hi = g.Calc_Hi(hi)
         pi = g.Calc_pi(hi)
         Pi = g.Calc_Pi(pi)
         media = g.Calc_Aithmetic_Average(xi, fi, n)
-        mediana = g.Calc_Median(intervalos, g.Calc_Fi(fi), n, amplitud, fi)
+        mediana = g.Calc_Median(intervalos, Arr_Fi, n, amplitud, fi)
         moda = g.Calc_Mode(intervalos, amplitud, fi)
         varianza = g.Calc_Variance(xi, fi, media, n)
         desviacion = g.Calc_Standart_Variation(varianza)

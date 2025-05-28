@@ -115,6 +115,7 @@ def Calc_Aithmetic_Average(Arr_xi, Arr_fi, n):
 def Calc_Median(Arr_Intervals , Arr_Fi , n , C , Arr_fi):
     Aprox_Position_Median_Class = n/2
     Position_Median_Class = 0
+    F_i_before = 0
 
     for i in range(0 , len(Arr_Fi)):
         F_i_before , Fi = 0 , 0  # F(i-1) y Fi
@@ -123,12 +124,12 @@ def Calc_Median(Arr_Intervals , Arr_Fi , n , C , Arr_fi):
         else:
             F_i_before = Arr_Fi[i - 1]
         
-            Fi = Arr_Fi[i]
+        Fi = Arr_Fi[i]
 
         if(F_i_before <= Aprox_Position_Median_Class < Fi):
             Position_Median_Class = i
-
-    return Arr_Intervals[Position_Median_Class][0] + (((n/2) - Arr_Fi[i - 1])/(Arr_fi[i])*C)
+            break
+    return Arr_Intervals[Position_Median_Class][0] + ((((n/2) - F_i_before)/(Arr_fi[Position_Median_Class]))*C)
 
 def Calc_Mode(Arr_Intervals , C , Arr_fi):
     Arr_Mo = []
@@ -139,7 +140,7 @@ def Calc_Mode(Arr_Intervals , C , Arr_fi):
 
     for idx in Idx_Max_fi:
         f_mo = Arr_fi[idx]
-        if(idx == 1):
+        if(idx == 0):
             fi_before = 0
         else:
             fi_before = Arr_fi[idx - 1]
