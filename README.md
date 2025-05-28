@@ -24,7 +24,7 @@ Tiene como propósito servir de ayuda en el análisis de grandes volúmenes de d
 
 ## 📚 Descripción
 
-El programa fue desarrollado como proyecto para el curso de *Estadística 2025-I*.  
+El programa fue desarrollado como proyecto para el curso de _Estadística 2025-I_.  
 Tiene el propósito de calcular las tablas de frecuencias de un conjunto de datos junto con sus respectivas medidas de tendencia central (si es que los datos ingresados son cuantitativos).
 
 ---
@@ -100,7 +100,7 @@ cd EstadisticaFreqCalc
 2. Ejecuta el script principal:
 
 ```bash
-python src/main.py
+python src/views/main.py
 ```
 
 3. Sigue las instrucciones en pantalla para ingresar tus datos.
@@ -130,4 +130,3 @@ Este proyecto fue desarrollado por el equipo de Estadística.
 ## 📄 Licencia
 
 Este proyecto está licenciado bajo la Licencia Pública General GNU v3.0. Consulta el archivo [LICENSE](LICENSE) para más detalles.
-

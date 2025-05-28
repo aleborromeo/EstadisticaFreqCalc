@@ -1,6 +1,7 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from path_manager import Get_Resource_Path
 import ttkbootstrap as ttkb
@@ -16,11 +17,12 @@ from ttkbootstrap import Style
 from tkinter import filedialog
 from datetime import datetime
 
+
 class VentanaProcesamiento:
     tabla_contador = 1
     grafico_contador = 1
 
-    def __init__(self, main_window , data, precision_from_main):
+    def __init__(self, main_window, data, precision_from_main):
         self.main_window = main_window
         self.main_window.state(newstate="withdraw")
 
@@ -29,11 +31,11 @@ class VentanaProcesamiento:
         self.root.title("Procesamiento de Datos")
         self.root.iconbitmap(Get_Resource_Path("assets/icono.ico"))
         self.root.configure(bg="#F5ECD5", highlightthickness=0, bd=0)
-        self.root.protocol("WM_DELETE_WINDOW" , self.ir_a_main)
-        self.style = ttkb.Style() 
+        self.root.protocol("WM_DELETE_WINDOW", self.ir_a_main)
+        self.style = ttkb.Style()
         self.estilos_personalizados()
 
-        self.root.state('zoomed')
+        self.root.state("zoomed")
         self.fig = None
 
         # Calcular el tamaño de la ventana
@@ -43,7 +45,6 @@ class VentanaProcesamiento:
         # Obtener las dimensiones de la pantalla
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-
 
         # Calcular la posición para centrar la ventana
         x = (screen_width // 2) - (width // 2)
@@ -66,15 +67,24 @@ class VentanaProcesamiento:
         self.contenedor = tk.Frame(self.canvas, bg="#F5ECD5")
         self.canvas.create_window((0, 0), window=self.contenedor, anchor="nw")
 
-        self.contenedor.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        self.contenedor.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
+        )
 
         # Frame centrado que contendrá los frames izquierdo y derecho
         self.frame_central = tk.Frame(self.contenedor, bg="#F5ECD5")
         self.frame_central.pack(pady=20)
 
         # Ajusta el ancho máximo deseado del contenido central (por ejemplo, 1200 px)
-        self.frame_central.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        self.canvas.bind("<Configure>", lambda e: self.frame_central.configure(width=min(e.width, 1200)))
+        self.frame_central.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")),
+        )
+        self.canvas.bind(
+            "<Configure>",
+            lambda e: self.frame_central.configure(width=min(e.width, 1200)),
+        )
 
         self.decimals_precision = IntVar(self.root)
         self.decimals_precision.set(precision_from_main)
@@ -99,14 +109,15 @@ class VentanaProcesamiento:
             bootstyle="light",
             padding=10,
             width=1000,
-            height=500  # Ajusta según lo que necesites
+            height=500,  # Ajusta según lo que necesites
         )
         self.frame_derecho.grid(row=0, column=1, sticky="n", padx=(10, 20), pady=20)
-        self.frame_derecho.grid_propagate(False) # Muy importante: evita expansión automática
+        self.frame_derecho.grid_propagate(
+            False
+        )  # Muy importante: evita expansión automática
 
         self.frame_central.grid_columnconfigure(0, weight=1)
-        #self.frame_central.grid_columnconfigure(1, weight=0)  # ⬅️ evita que la derecha crezca
-
+        # self.frame_central.grid_columnconfigure(1, weight=0)  # ⬅️ evita que la derecha crezca
 
         # Control precisión y tabla frecuencia
         precision_label = ttkb.Label(
@@ -137,7 +148,7 @@ class VentanaProcesamiento:
         self.grafico_frame = tk.Frame(self.frame_izquierdo, bg="#F5ECD5")
         self.grafico_frame.pack(fill="x", pady=10)
 
-        plt.style.use('ggplot')
+        plt.style.use("ggplot")
 
         self.fig, self.ax = plt.subplots(figsize=(10, 4))
         self.canvas_fig = FigureCanvasTkAgg(self.fig, master=self.grafico_frame)
@@ -160,23 +171,23 @@ class VentanaProcesamiento:
             text="🔄 Volver a calcular",
             style="Custom.TButton",
             command=self.ir_a_main,
-            width=40
+            width=40,
         )
         btn_regresar.place(x=1425, y=600)
-        
+
         btn_exportarGrafico = ttkb.Button(
             self.root,
             text="Exportar Gráfico",
             style="Custom.TButton",
             command=self.export_graphs,
-            width=40
+            width=40,
         )
         btn_exportarGrafico.place(x=1425, y=540)
 
         self.root.mainloop()
 
     def mostrar_tabla_frecuencia(self, precision):
-        if(self.tabla):
+        if self.tabla:
             for item in self.tabla.get_children():
                 self.tabla.delete(item)
 
@@ -220,11 +231,18 @@ class VentanaProcesamiento:
         tabla_frame = tk.Frame(self.frame_izquierdo, bg="#F5ECD5")
         tabla_frame.pack(fill="both", expand=True)
 
-        if(not self.tabla):
+        if not self.tabla:
             style = ttk.Style()
             style.theme_use("clam")
-            style.configure("Custom.Treeview", background="#FFFFFF", foreground="black", rowheight=25)
-            style.configure("Custom.Treeview.Heading", background="#5D6D7E", foreground="white")
+            style.configure(
+                "Custom.Treeview",
+                background="#FFFFFF",
+                foreground="black",
+                rowheight=25,
+            )
+            style.configure(
+                "Custom.Treeview.Heading", background="#5D6D7E", foreground="white"
+            )
 
             tabla_frame = tk.Frame(self.frame_izquierdo, bg="#F5ECD5")
             tabla_frame.pack(fill="both", expand=True)
@@ -233,13 +251,15 @@ class VentanaProcesamiento:
             scroll_y.pack(side="right", fill="y")
             scroll_x = tk.Scrollbar(tabla_frame, orient="horizontal")
             scroll_x.pack(side="bottom", fill="x")
-            self.tabla = ttk.Treeview(tabla_frame,
-                                    columns=columnas,
-                                    show="headings",
-                                    yscrollcommand=scroll_y.set,
-                                    xscrollcommand=scroll_x.set,
-                                    height=8,
-                                    style="Custom.Treeview")
+            self.tabla = ttk.Treeview(
+                tabla_frame,
+                columns=columnas,
+                show="headings",
+                yscrollcommand=scroll_y.set,
+                xscrollcommand=scroll_x.set,
+                height=8,
+                style="Custom.Treeview",
+            )
 
             scroll_y.config(command=self.tabla.yview)
             scroll_x.config(command=self.tabla.xview)
@@ -268,7 +288,7 @@ class VentanaProcesamiento:
         self.tabla.pack(fill="both", expand=True)
 
     def _dibujar_grafico(self):
-        if(self.data["tipo"] == "Discreta"):
+        if self.data["tipo"] == "Discreta":
             self.ax.clear()
 
             clases = None
@@ -277,46 +297,70 @@ class VentanaProcesamiento:
             elif self.data["tipo"] == "Continua":
                 clases = [f"[ {i[0]} - {i[1]} >" for i in self.data["intervalos"]]
 
-            self.ax.bar(clases, self.data["fi"], color="#69b3a2" , edgecolor="black" , width=0.6)
-            self.ax.set_title(f"Gráfico {self.grafico_contador:02d}: Distribución de Frecuencias", fontsize=12, fontweight="bold")
+            self.ax.bar(
+                clases, self.data["fi"], color="#69b3a2", edgecolor="black", width=0.6
+            )
+            self.ax.set_title(
+                f"Gráfico {self.grafico_contador:02d}: Distribución de Frecuencias",
+                fontsize=12,
+                fontweight="bold",
+            )
             self.ax.set_xticks(range(len(clases)))
-            self.ax.set_xticklabels(clases, fontsize=9, rotation=30, rotation_mode="anchor", ha="right")
+            self.ax.set_xticklabels(
+                clases, fontsize=9, rotation=30, rotation_mode="anchor", ha="right"
+            )
 
             self.ax.set_xlabel("Clases", fontsize=12)
             self.ax.set_ylabel("Frecuencia", fontsize=12)
 
-            self.ax.grid(axis='y', linestyle='--', alpha=0.5)
+            self.ax.grid(axis="y", linestyle="--", alpha=0.5)
 
             for i, v in enumerate(self.data["fi"]):
-                self.ax.text(i, v + (v * 0.01), f'{self.data["fi"][i]}', ha='center' , fontsize=10)
-            
-            for spine in ['top', 'right']:
+                self.ax.text(
+                    i, v + (v * 0.01), f'{self.data["fi"][i]}', ha="center", fontsize=10
+                )
+
+            for spine in ["top", "right"]:
                 self.fig.gca().spines[spine].set_visible(False)
-            
+
             self.fig.tight_layout()
             self.canvas_fig.draw()
-        elif(self.data["tipo"] == "Continua"):
-            if(not "data" in self.data):
+        elif self.data["tipo"] == "Continua":
+            if not "data" in self.data:
                 raise Exception("No se encontraron los datos originales.")
             self.ax.clear()
 
             inf_limits = [limits[0] for limits in self.data["intervalos"]]
-            cuentas, bordes, patches = self.ax.hist(self.data["data"] , bins=inf_limits, edgecolor='white', align='mid', rwidth=1 , color="#69b3a2" , alpha=0.8)
+            cuentas, bordes, patches = self.ax.hist(
+                self.data["data"],
+                bins=inf_limits,
+                edgecolor="white",
+                align="mid",
+                rwidth=1,
+                color="#69b3a2",
+                alpha=0.8,
+            )
             for i in range(len(cuentas)):
                 altura = cuentas[i]
-                centro = (bordes[i] + bordes[i+1]) / 2
-                self.ax.text(centro, altura + (altura * 0.01), str(int(altura)), ha='center', va='bottom')
+                centro = (bordes[i] + bordes[i + 1]) / 2
+                self.ax.text(
+                    centro,
+                    altura + (altura * 0.01),
+                    str(int(altura)),
+                    ha="center",
+                    va="bottom",
+                )
             puntos_medios = 0.5 * (bordes[:-1] + bordes[1:])
 
             self.ax.plot(
-                puntos_medios, 
-                cuentas, 
-                color='crimson', 
-                linewidth=2, 
-                marker='o', 
+                puntos_medios,
+                cuentas,
+                color="crimson",
+                linewidth=2,
+                marker="o",
                 markersize=6,
-                markerfacecolor='white',
-                markeredgewidth=2
+                markerfacecolor="white",
+                markeredgewidth=2,
             )
 
             self.ax.set_xticks(inf_limits)
@@ -325,56 +369,81 @@ class VentanaProcesamiento:
             self.ax.set_ylabel("Frecuencia")
             self.ax.set_title("Grafico N°01 Histograma de Frecuencias")
             self.ax.set_xticks(inf_limits)
-            self.ax.set_xticklabels(inf_limits , rotation=30 , rotation_mode="anchor" , ha="right")
+            self.ax.set_xticklabels(
+                inf_limits, rotation=30, rotation_mode="anchor", ha="right"
+            )
 
-            for spine in ['top', 'right']:
+            for spine in ["top", "right"]:
                 self.fig.gca().spines[spine].set_visible(False)
 
-            self.ax.grid(axis='y', linestyle='--', alpha=0.4)
+            self.ax.grid(axis="y", linestyle="--", alpha=0.4)
 
             self.fig.tight_layout()
             self.canvas_fig.draw()
         else:
             raise Exception("No se detecto el tipo de variable")
 
-    def mostrar_resultados_estadisticos(self , precision):
-        if(self.tabla_estadistica):
+    def mostrar_resultados_estadisticos(self, precision):
+        if self.tabla_estadistica:
             for item in self.tabla_estadistica.get_children():
                 self.tabla_estadistica.delete(item)
 
-        if(not self.tabla_estadistica):
-            self.tabla_estadistica = ttk.Treeview(self.frame_derecho, columns=("Medida", "Valor"), show="headings", height=15)
+        if not self.tabla_estadistica:
+            self.tabla_estadistica = ttk.Treeview(
+                self.frame_derecho,
+                columns=("Medida", "Valor"),
+                show="headings",
+                height=15,
+            )
             self.tabla_estadistica.heading("Medida", text="Medida")
             self.tabla_estadistica.heading("Valor", text="Valor")
             self.tabla_estadistica.column("Medida", anchor="center", width=300)
             self.tabla_estadistica.column("Valor", anchor="center", width=200)
 
-        if(self.data["tipo"] == "Discreta"):
+        if self.data["tipo"] == "Discreta":
             medidas = [
                 ("Numero total de datos (n)", self.data["Numero Datos"]),
                 ("Media", f"{self.data['media']:.{precision}f}"),
                 ("Mediana", f"{self.data['mediana']:.{precision}f}"),
-                ("Moda", "- ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
+                (
+                    "Moda",
+                    (
+                        "- ".join(f"{data:.{precision}f}" for data in self.data["moda"])
+                        if isinstance(self.data["moda"], list)
+                        else f"{self.data['moda']:.{precision}f}"
+                    ),
+                ),
                 ("Varianza", f"{self.data['varianza']:.{precision}f}"),
                 ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
-                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
-        elif(self.data["tipo"] == "Continua"):
+                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%"),
+            ]
+        elif self.data["tipo"] == "Continua":
             medidas = [
                 ("Numero total de datos (n)", self.data["Numero Datos"]),
-                ("Vmin", self.data["Vmin"]),
-                ("Vmax", self.data["Vmax"]),
-                ("Rango (R)", self.data["Rango"]),
+                ("Vmin", f"{self.data["Vmin"]:.{precision}f}"),
+                ("Vmax", f"{self.data["Vmax"]:.{precision}f}"),
+                ("Rango (R)", f"{self.data["Rango"]:.{precision}f}"),
                 ("Numero de Intervalos (m)", self.data["Numero Intervalos"]),
                 ("Amplitud (A)", self.data["Amplitud"]),
                 ("Media", f"{self.data['media']:.{precision}f}"),
                 ("Mediana", f"{self.data['mediana']:.{precision}f}"),
-                ("Moda", "- ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
+                (
+                    "Moda",
+                    (
+                        "- ".join(f"{data:.{precision}f}" for data in self.data["moda"])
+                        if isinstance(self.data["moda"], list)
+                        else f"{self.data['moda']:.{precision}f}"
+                    ),
+                ),
                 ("Varianza", f"{self.data['varianza']:.{precision}f}"),
                 ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
-                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
+                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%"),
+            ]
         for i, (medida, valor) in enumerate(medidas):
             tag = "evenrow" if i % 2 == 0 else "oddrow"
-            self.tabla_estadistica.insert("", tk.END, values=(medida, valor), tags=(tag,))
+            self.tabla_estadistica.insert(
+                "", tk.END, values=(medida, valor), tags=(tag,)
+            )
 
         self.tabla_estadistica.pack(fill="both", expand=False, padx=(0, 140))
         self.tabla_estadistica.tag_configure("evenrow", background="#F5F5F5")
@@ -382,47 +451,65 @@ class VentanaProcesamiento:
 
     def export_graphs(self):
         PATH = filedialog.askdirectory()
-        if(not os.path.exists(PATH)):
+        if not os.path.exists(PATH):
             raise Exception("Ruta no valida")
 
-        if(self.data["tipo"] == "Discreta"):
-            if(PATH):
+        if self.data["tipo"] == "Discreta":
+            if PATH:
                 now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
                 file_name = f"Image_{now_time}.jpg"
-                PATH = os.path.join(PATH , file_name)
-                self.fig.savefig(PATH , dpi=300)
-        elif(self.data["tipo"] == "Continua"):
-            if(PATH):
+                PATH = os.path.join(PATH, file_name)
+                self.fig.savefig(PATH, dpi=300)
+        elif self.data["tipo"] == "Continua":
+            if PATH:
                 now_time = datetime.now().strftime("%d_%m_%Y %H_%M_%S")
                 file_name = f"Image_{now_time}.jpg"
-                PATH = os.path.join(PATH , file_name)
-                self.fig.savefig(PATH , dpi=300)
+                PATH = os.path.join(PATH, file_name)
+                self.fig.savefig(PATH, dpi=300)
 
     def estilos_personalizados(self):
-        self.style.configure("Custom.TButton",
+        self.style.configure(
+            "Custom.TButton",
             font=("Franklin Gothic Demi", 13),
             foreground="#F5ECD5",
             background="#626F47",
             padding=10,
             borderwidth=0,
-            relief="flat")
+            relief="flat",
+        )
 
-        self.style.map("Custom.TButton",
+        self.style.map(
+            "Custom.TButton",
             background=[("active", "#4E5A36"), ("!active", "#626F47")],
-            foreground=[("disabled", "#A0A0A0"), ("!disabled", "#F5ECD5")])
-
+            foreground=[("disabled", "#A0A0A0"), ("!disabled", "#F5ECD5")],
+        )
 
     def update_table(self):
         self.mostrar_tabla_frecuencia(self.decimals_precision.get())
         self.mostrar_resultados_estadisticos(self.decimals_precision.get())
-        
+
     def ir_a_main(self):
         self.root.quit()
         self.root.destroy()
 
         style = ttkb.Style()
-        style.configure("Custom.TLabel", foreground="#222831", background="#F5ECD5", font=("Franklin Gothic Demi", 13))
-        style.configure("Custom.TButton", foreground="#F5ECD5", background="#626F47", font=("Franklin Gothic Demi", 13))
-        style.configure("Custom.TEntry", fieldbackground="#FFFFFF", foreground="#222831", font=("Aptos", 12))
+        style.configure(
+            "Custom.TLabel",
+            foreground="#222831",
+            background="#F5ECD5",
+            font=("Franklin Gothic Demi", 13),
+        )
+        style.configure(
+            "Custom.TButton",
+            foreground="#F5ECD5",
+            background="#626F47",
+            font=("Franklin Gothic Demi", 13),
+        )
+        style.configure(
+            "Custom.TEntry",
+            fieldbackground="#FFFFFF",
+            foreground="#222831",
+            font=("Aptos", 12),
+        )
         self.main_window.state(newstate="normal")
         self.main_window.lift()

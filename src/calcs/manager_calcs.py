@@ -5,10 +5,15 @@ from calcs import cuantitative_grouped_data as g
 
 from python_calamine import CalamineWorkbook
 
-def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_idx):
+
+def gestionar_datos(path_excel, column_name, tipo_variable, precision, sheet_idx):
     # Leer Excel
-    Excel = CalamineWorkbook.from_path(path_excel).get_sheet_by_index(sheet_idx - 1).to_python(skip_empty_area=False)
-    df = pd.DataFrame(data=Excel[1:] , columns=Excel[0])
+    Excel = (
+        CalamineWorkbook.from_path(path_excel)
+        .get_sheet_by_index(sheet_idx - 1)
+        .to_python(skip_empty_area=False)
+    )
+    df = pd.DataFrame(data=Excel[1:], columns=Excel[0])
     if column_name not in df.columns:
         raise ValueError("La columna no existe en el archivo Excel.")
 
@@ -37,9 +42,18 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         return {
             "Numero Datos": n,
             "tipo": "Discreta",
-            "xi": xi, "fi": fi, "hi": hi, "Hi": Hi, "pi": pi, "Pi": Pi,
-            "media": media, "mediana": mediana, "moda": moda,
-            "varianza": varianza, "desviacion": desviacion, "coef_variacion": coef_variacion
+            "xi": xi,
+            "fi": fi,
+            "hi": hi,
+            "Hi": Hi,
+            "pi": pi,
+            "Pi": Pi,
+            "media": media,
+            "mediana": mediana,
+            "moda": moda,
+            "varianza": varianza,
+            "desviacion": desviacion,
+            "coef_variacion": coef_variacion,
         }
 
     elif tipo_variable == "Continua":
@@ -50,7 +64,9 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         rango = g.Calc_Range(data)
         k = g.Calc_Intervals_Number(n)
         k_redondeado = g.Calc_Rounded_Intervals_Number(k)
-        amplitud, decimales = g.Calc_Amplitude(rango, k_redondeado, max_n_decimals_in_data)
+        amplitud, decimales = g.Calc_Amplitude(
+            rango, k_redondeado, max_n_decimals_in_data
+        )
         print(f"{amplitud=} ; {decimales=}")
         intervalos = g.Calc_Intervals(vmin, amplitud, k_redondeado, decimales)
         xi = g.Calc_xi(intervalos)
@@ -69,12 +85,27 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         coef_variacion = g.Calc_Coefficient_Variation(desviacion, media)
 
         return {
-            "Numero Datos": n, "Vmin": vmin, "Vmax": vmax, "Rango": rango, "Numero Intervalos": k_redondeado , "Amplitud": amplitud,
-            "data" : data,
+            "Numero Datos": n,
+            "Vmin": vmin,
+            "Vmax": vmax,
+            "Rango": rango,
+            "Numero Intervalos": k_redondeado,
+            "Amplitud": amplitud,
+            "data": data,
             "tipo": "Continua",
-            "intervalos": intervalos, "xi": xi, "fi": fi, "hi": hi, "Hi": Hi, "pi": pi, "Pi": Pi,
-            "media": media, "mediana": mediana, "moda": moda,
-            "varianza": varianza, "desviacion": desviacion, "coef_variacion": coef_variacion
+            "intervalos": intervalos,
+            "xi": xi,
+            "fi": fi,
+            "hi": hi,
+            "Hi": Hi,
+            "pi": pi,
+            "Pi": Pi,
+            "media": media,
+            "mediana": mediana,
+            "moda": moda,
+            "varianza": varianza,
+            "desviacion": desviacion,
+            "coef_variacion": coef_variacion,
         }
 
     else:
