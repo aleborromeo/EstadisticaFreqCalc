@@ -8,12 +8,17 @@ Tiene como propósito servir de ayuda en el análisis de grandes volúmenes de d
 
 ## 📑 Tabla de Contenido
 
-1. [Descripción](#descripción)
-2. [Estructura del Proyecto](#estructura-del-proyecto)
-3. [Demo](#demo)
-4. [Instalación](#instalación)
-5. [Guía de Uso](#guía-de-uso)
-6. [Contribuidores](#contribuidores)
+- [📊 Programa de Cálculo de Frecuencias](#-programa-de-cálculo-de-frecuencias)
+  - [📑 Tabla de Contenido](#-tabla-de-contenido)
+  - [📚 Descripción](#-descripción)
+  - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+  - [📸 Demo](#-demo)
+  - [🚀 Instalación](#-instalación)
+    - [Programas requeridos](#programas-requeridos)
+    - [Librerías necesarias](#librerías-necesarias)
+  - [📝 Guía de Uso](#-guía-de-uso)
+  - [🤝 Contribuidores](#-contribuidores)
+  - [📄 Licencia](#-licencia)
 
 ---
 
@@ -26,14 +31,22 @@ Tiene el propósito de calcular las tablas de frecuencias de un conjunto de dato
 
 ## 📁 Estructura del Proyecto
 
-```
+```bash
 EstadisticaFreqCalc/
-├── assets/                 # Recursos gráficos y archivos auxiliares
-├── src/                    # Código fuente principal del programa
-│   └── main.py             # Script principal de ejecución
-├── .gitignore              # Archivos y carpetas ignorados por Git
-├── LICENSE                 # Licencia del proyecto (GPL-3.0)
-└── README.md               # Documentación del proyecto
+├── assets/                                     # Recursos gráficos y archivos auxiliares
+├── src/                                        # Código fuente principal del programa
+│   ├── calcs/
+│   │   ├── cuantitative_grouped_data.py        # Calculos de frecuencias y medidas de resumen para datos agrupados en intervalos
+│   │   ├── cuantitative_no_grouped_data.py     # Calculos de frecuencias y medidas de resumen para datos no agrupados
+│   │   └── manager_calcs.py                    # Importacion de datos y seleccion de tipo
+│   ├── views/
+│   │   ├── main.py                             # Script principal de ejecución
+│   │   └── results.py                          # Ventana de visualizacion de resultados
+│   ├── exception_handler.py                    # Archivo de Excepciones personalizadas
+│   └── path_manager.py                         # Archivo para la obtencion de rutas absolutas
+├── .gitignore                                  # Archivos y carpetas ignorados por Git
+├── LICENSE                                     # Licencia del proyecto (GPL-3.0)
+└── README.md                                   # Documentación del proyecto
 ```
 
 ---
@@ -61,11 +74,16 @@ Asegúrate de tener instaladas las siguientes librerías:
 - NumPy 2.2.5
 - Pandas 2.2.3
 - Matplotlib 3.10.1
+- python-calamine
+- polars
+- openpyxl
+- ttkbootstrap
+- PIL
 
 Puedes instalarlas utilizando el siguiente comando:
 
 ```bash
-pip install numpy==2.2.5 pandas==2.2.3 matplotlib==3.10.1
+pip install numpy==2.2.5 pandas==2.2.3 matplotlib==3.10.1 python-calamine polars openpyxl ttkbootstrap PIL
 ```
 
 ---
