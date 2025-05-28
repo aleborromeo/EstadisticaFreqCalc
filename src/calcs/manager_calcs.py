@@ -35,6 +35,7 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         coef_variacion = nq.Calc_Coefficient_Variation(desviacion, media)
 
         return {
+            "Numero Datos": n,
             "tipo": "Discreta",
             "xi": xi, "fi": fi, "hi": hi, "Hi": Hi, "pi": pi, "Pi": Pi,
             "media": media, "mediana": mediana, "moda": moda,
@@ -68,6 +69,7 @@ def gestionar_datos(path_excel, column_name, tipo_variable, precision , sheet_id
         coef_variacion = g.Calc_Coefficient_Variation(desviacion, media)
 
         return {
+            "Numero Datos": n, "Vmin": vmin, "Vmax": vmax, "Rango": rango, "Numero Intervalos": k_redondeado , "Amplitud": amplitud,
             "data" : data,
             "tipo": "Continua",
             "intervalos": intervalos, "xi": xi, "fi": fi, "hi": hi, "Hi": Hi, "pi": pi, "Pi": Pi,

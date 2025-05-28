@@ -346,16 +346,32 @@ class VentanaProcesamiento:
             self.tabla_estadistica = ttk.Treeview(self.frame_derecho, columns=("Medida", "Valor"), show="headings", height=15)
             self.tabla_estadistica.heading("Medida", text="Medida")
             self.tabla_estadistica.heading("Valor", text="Valor")
-            self.tabla_estadistica.column("Medida", anchor="center", width=200)
+            self.tabla_estadistica.column("Medida", anchor="center", width=300)
             self.tabla_estadistica.column("Valor", anchor="center", width=200)
 
-        medidas = [
-            ("Media", f"{self.data['media']:.{precision}f}"),
-            ("Mediana", f"{self.data['mediana']:.{precision}f}"),
-            ("Moda", ", ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
-            ("Varianza", f"{self.data['varianza']:.{precision}f}"),
-            ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
-            ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
+        if(self.data["tipo"] == "Discreta"):
+            medidas = [
+                ("Numero total de datos (n)", self.data["Numero Datos"]),
+                ("Media", f"{self.data['media']:.{precision}f}"),
+                ("Mediana", f"{self.data['mediana']:.{precision}f}"),
+                ("Moda", "- ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
+                ("Varianza", f"{self.data['varianza']:.{precision}f}"),
+                ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
+                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
+        elif(self.data["tipo"] == "Continua"):
+            medidas = [
+                ("Numero total de datos (n)", self.data["Numero Datos"]),
+                ("Vmin", self.data["Vmin"]),
+                ("Vmax", self.data["Vmax"]),
+                ("Rango (R)", self.data["Rango"]),
+                ("Numero de Intervalos (m)", self.data["Numero Intervalos"]),
+                ("Amplitud (A)", self.data["Amplitud"]),
+                ("Media", f"{self.data['media']:.{precision}f}"),
+                ("Mediana", f"{self.data['mediana']:.{precision}f}"),
+                ("Moda", "- ".join(f"{data:.{precision}f}" for data in self.data['moda']) if isinstance(self.data['moda'], list) else f"{self.data['moda']:.{precision}f}"),
+                ("Varianza", f"{self.data['varianza']:.{precision}f}"),
+                ("Desviación Estándar", f"{self.data['desviacion']:.{precision}f}"),
+                ("Coef. de Variación", f"{self.data['coef_variacion']:.{precision}f}%")]
         for i, (medida, valor) in enumerate(medidas):
             tag = "evenrow" if i % 2 == 0 else "oddrow"
             self.tabla_estadistica.insert("", tk.END, values=(medida, valor), tags=(tag,))
